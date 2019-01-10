@@ -1,0 +1,55 @@
+public class HelloWorld{
+    public static void main(String[]args){
+        System.out.println("Hello World.");
+        numbersequences a = new numbersequences();
+        System.out.println(a.fibonaccisequence(5));
+    }
+}
+
+
+public class numbersequences{
+    public int fibonacci(int n){
+        if (n == 1 || n == 2){
+            return 1;
+        }
+        else{
+            return fibonacci(n-1) + fibonacci(n-2);
+        }
+    }
+    public int[] fibonaccisequence(int n){
+        int[] numarray = new int[n];
+        for (int i=1;i<=n;i++){
+            numarray[i-1] = (fibonacci(i));
+        }
+        return(numarray);
+    }
+    public int[] cubicnumbers(int n){
+        int[] numarray = new int[n];
+        for (int i=1;i<=n;i++){
+            numarray[i-1] = (i^3);
+        }
+        return(numarray);
+    }
+    public int[] squaresequence(int n){
+        int[] numarray = new int[n];
+        for (int i=1;i<=n;i++){
+            numarray[i-1] = (i^2);
+        }
+        return(numarray);
+    }
+    public int triangularnumbers(int n){
+        if (n==1){
+            return 1;
+        }
+        else{
+            return(triangularnumbers(n-1) + n);
+        }
+    }
+    public int[] triangularsequence(int n){
+        int[] numarray = new int[n];
+        for (int i=1; i<=n; i++){
+            numarray[i-1] = triangularnumbers(i);
+        }
+        return(numarray);
+    }
+}
