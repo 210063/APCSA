@@ -1,0 +1,161 @@
+import java.util.Arrays;
+public abstract class player{
+    char[][]board = {{'_','_','_','_'},{'_','_','_','_'},{'_','_','_','_'},{'_','_','_','_'}};
+    public char letter;
+    public abstract void playMove(char[][]arr);
+    public char[][] getboard(){
+        return board;
+    }
+    public char[][]getResult(int xcor, int ycor, char l, char[][]arr){
+        if (arr[xcor-1][ycor-1] != '_'){
+            System.out.println("That spot is already taken! You miss a turn!");
+        }
+        else{
+          arr[xcor-1][ycor-1] = l;
+        }
+        board = arr;
+        return arr;
+    }
+    public char getLetter(){
+        return letter;
+    }
+    public int WinLose(char l, char[][]ammended){
+        boolean horstatus;
+        boolean vertstatus;
+        boolean diagstatus = true;
+        for (int i=0;i<4;i++){
+            horstatus = true;
+            vertstatus = true;
+            diagstatus = true;
+            for (int j=0;j<4;j++){
+            if (ammended[i][j] != l){
+                horstatus = false;
+                }
+            if (ammended[j][i] !=l){
+                vertstatus = false;
+                }
+                if (ammended[j][j] != l){
+                diagstatus =  false;
+            }
+            }
+            
+            if(horstatus == true || vertstatus == true){
+
+                return 1;
+               
+            }
+            if(diagstatus == true){
+                return 1;
+            }
+        }
+        if((ammended[0][3] == l && ammended[1][2] == l && ammended[2][1] == l && ammended[3][0] == l)){
+                return 1;
+            }
+        return 0;
+    }
+}
+import java.util.Scanner;
+import java.util.Arrays;
+public class humanPlayer extends player{
+    private char[][]array = board;
+    public void chooseTeam(){
+        System.out.print("Select Player");
+        Scanner sc = new Scanner(System.in);
+        letter = sc.nextLine().charAt(0);
+    }
+    public void playMove(char[][]arr){
+        int xcor;
+        int ycor;
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Select row number");
+        xcor = sc.nextInt();
+        System.out.print("Select column number");
+        ycor = sc.nextInt();
+        array = getResult(xcor, ycor, letter, arr);
+        for (int i=0; i<4;i++){
+            System.out.println(Arrays.toString(array[i]));
+        }
+    }
+}
+
+import java.util.Arrays;
+public class computerplayer extends player{
+    public computerplayer (char o){
+        if (o == 'X'){
+            letter = 'O';
+        }
+        else{
+            letter = 'X';
+        }
+    }
+    public void playMove(char[][]arr){
+        System.out.println("Computer to play!");
+        System.out.println(" ");
+        char[][]array = arr;
+        int x = 1 + (int)(Math.random() * ((4)));
+        int y = 1 + (int)(Math.random() * ((4)));
+        if (array[x-1][y-1] == '_'){
+            array = getResult(x, y, letter, arr);
+            System.out.println(" ");
+            for (int i=0; i<4;i++){
+                
+                System.out.println(Arrays.toString(array[i]));
+            }
+        }
+        else{
+            playMove(array);
+        }
+    }
+}
+
+
+
+public class PlayTheGame{
+    public static void play(player a, player b){
+        int turns = 1;
+        while (turns <= 16){
+            a.playMove(b.getboard());
+            if(a.WinLose(a.getLetter(), a.getboard()) == 1){
+                a.WinLose(a.getLetter(), a.getboard());
+                System.out.println(a.getLetter() + " Wins!");
+                break;
+            }
+            b.playMove(a.getboard());
+            if(b.WinLose(b.getLetter(), b.getboard()) == 1){
+                System.out.println(b.getLetter() + " Wins!");
+                break;
+            }
+            turns++;
+        }
+        if (turns > 16){
+            System.out.println("Its a tie!");
+        }
+    }
+    
+}
+
+
+import java.util.Scanner;
+public class test extends PlayTheGame{
+    public static void main(String[]args){
+        char singledouble;
+        System.out.println("Welcome to Tic Tac Toe! S for singlaplayer and D for two players!");
+        Scanner sc = new Scanner(System.in);
+        singledouble = sc.nextLine().charAt(0);
+        humanPlayer a = new humanPlayer();
+        a.chooseTeam();
+        if(singledouble == 'D'){
+        humanPlayer b = new humanPlayer();
+        b.chooseTeam();
+        play(a, b);
+
+        }
+        else{
+            computerplayer b = new computerplayer(a.getLetter());
+
+            play(a, b);
+
+        }
+
+    }
+}
