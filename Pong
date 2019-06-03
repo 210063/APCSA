@@ -1,0 +1,238 @@
+import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import javax.swing.*;
+import java.util.Date;
+
+
+public class Main extends JFrame {
+    
+    //screen size variables.
+    int gWidth = 500;
+    int gHeight = 400;
+    
+    Image image;
+    Graphics graphics;
+    //ball object
+    static Ball b = new Ball(250,250);
+    //paddle objects
+    static HumanPaddle h = new HumanPaddle(10, 25, 1, Color.CYAN, b);
+    static ComputerPaddle h2 = new ComputerPaddle(485, 25, b);
+    //constructor for window
+    public Main() {
+        this.setTitle("Pong!");
+        this.setSize(gWidth,gHeight);
+        this.setResizable(false);
+        this.setVisible(true);
+        this.setBackground(Color.DARK_GRAY);
+        addKeyListener(h);
+    }
+    public static void main(String[] args) {
+        
+        Main pg = new Main();
+        Thread ball = new Thread(b);
+        Thread p1 = new Thread(h);
+        Thread p2 = new Thread(h2);
+        ball.start();
+        p1.start();
+        p2.start();
+    }
+    @Override
+    public void paint(Graphics g) {
+        image = createImage(getWidth(), getHeight());
+        graphics = image.getGraphics();
+        draw(graphics);
+        g.drawImage(image, 0, 0, this);
+
+    }
+    public void draw(Graphics g){
+        b.draw(g);
+        h.draw(g); 
+        h2.draw(g);
+
+        repaint();
+    }
+}
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+public class Ball implements Runnable{
+    private int x, y;
+    private int xDirection = -1, yDirection = -1;
+    Rectangle ball;
+    public Ball(int x, int y){
+        this.x = x;
+        this.y = y;
+        ball = new Rectangle(this.x, this.y, 15, 15);
+    }
+    public void draw(Graphics g) {
+        g.setColor(Color.WHITE);
+        g.fillRect(ball.x, ball.y, ball.width, ball.height);
+        
+    }
+    public void setXDirection(int xDir){
+            xDirection = xDir;
+        }
+    public void setYDirection(int yDir){
+            yDirection = yDir;
+        }
+    public int getY(){
+        return y;
+    }   
+    public void move(){
+        ball.x += xDirection;
+        ball.y += yDirection;
+        if (ball.x <= 0) {
+		setXDirection(+1);			
+	}
+	if (ball.x >= 485) {
+		setXDirection(-1);
+	}
+		
+	if (ball.y <= 15) {
+		setYDirection(+1);
+	}
+		
+	if (ball.y >= 385) {
+		setYDirection(-1);
+		}
+		
+    }
+    public void run(){
+        try {
+            while(true) {
+                move();
+                Thread.sleep(8);
+            }
+        }catch(Exception e) { System.err.println(e.getMessage());
+          }
+        }
+}
+
+import java.util.Scanner;
+import java.awt.*;  
+import javax.swing.JFrame;  
+public abstract class Paddle implements Runnable{
+    private int x, y, yDirection, playerNum;
+    private Color c;
+    Rectangle paddle; 
+    Ball b;
+
+    public Paddle(int x, int y, int playerNum, Color c, Ball b){
+        this.x = x;
+        this.y = y;
+        this.playerNum = playerNum;
+        this.c = c;
+        this.b = b;
+        paddle = new Rectangle(x, y, 10, 50);
+    }
+    public void draw(Graphics g){
+        g.setColor(c);
+        g.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+    }
+    public void setYDirection(int yD){
+        yDirection = yD;
+    }
+    public int getYDirection(){
+        return yDirection;
+    }
+    public int getPlayerNum(){
+        return playerNum;
+    }
+    public void collision(){
+        if (b.ball.intersects(paddle)){
+            if(playerNum == 1){
+                b.setXDirection(1);
+            }
+            else{
+                b.setXDirection(-1);
+            }
+        }
+    }
+
+    public void move(){
+        collision();
+    }
+    
+    public void run() {
+		try {
+			while(true) {
+				move();
+				Thread.sleep(7);
+			}
+		} catch(Exception e) { System.err.println(e.getMessage()); }
+	}
+}
+
+import java.awt.*;  
+import javax.swing.JFrame; 
+import java.awt.event.*; 
+public class HumanPaddle extends Paddle implements KeyListener{
+    public HumanPaddle(int x, int y, int PlayerNum, Color c, Ball b){
+        super(x, y, PlayerNum, c, b);
+    }
+    public void keyPressed(KeyEvent e){
+        
+
+        switch(getPlayerNum()) {
+                default:
+            System.out.println("Invalid PlayerNum");
+            break;
+        case 1:
+            if(e.getKeyCode() == KeyEvent.VK_W) {
+                setYDirection(-1);
+            }
+            if(e.getKeyCode() == KeyEvent.VK_S) {
+                setYDirection(1);
+            }
+            break;
+            
+        case 2:
+            if(e.getKeyCode() == KeyEvent.VK_UP) {
+                setYDirection(-1);
+            }
+            if(e.getKeyCode() == KeyEvent.VK_DOWN) {
+                setYDirection(1);
+            }
+        }
+        
+    }
+    public void keyReleased(KeyEvent e){
+        setYDirection(0);
+    }
+    public void keyTyped(KeyEvent e){
+    }
+    public void move(){
+        super.move();
+        paddle.y += getYDirection();
+        if (paddle.y <= 15){
+            paddle.y = 15;
+        }
+        if (paddle.y >= 340){
+            paddle.y = 340;
+        }
+    }
+}
+    
+
+
+import java.awt.Color;
+public class ComputerPaddle extends Paddle{
+    public ComputerPaddle(int x, int y, Ball b){
+        super(x, y, 2, Color.PINK, b);
+        setYDirection(-1);
+    }
+    public void move(){
+        super.move();
+        paddle.y += getYDirection();
+        if (paddle.y <= 15){
+            paddle.y = 15;
+            setYDirection(1);
+        }
+        if (paddle.y >= 340){
+            paddle.y = 340;
+            setYDirection(-1);
+        }
+    }
+}
